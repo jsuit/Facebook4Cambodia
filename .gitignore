@@ -1,0 +1,4 @@
+*.ipynb
+*.idea
+*.py[cod]
+*$py.class
