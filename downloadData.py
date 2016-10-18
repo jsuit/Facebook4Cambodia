@@ -8,7 +8,7 @@ import Globals
 reload(sys)
 sys.setdefaultencoding('utf8')
 import gettext
-
+import string
 class GraphAPI():
 
     access_token = Globals.access_token
@@ -79,19 +79,95 @@ class GraphAPI():
         return  txt['likes']['summary']['total_count']
 
 
+    def numberOfKindOfChar(self, fileName,searchFor="?"):
+        saveFileName = 'contains'+searchFor+'.txt'
+        count = 0
+        total = 0
+        rFile = open(fileName,'r')
+        posts = json.load(rFile)
+        rFile.close()
+        likesForSearchFor ={}
+        for page in posts:
+            page = json.loads(page)
+            for post in page:
+                total+=1
+                if 'message' in post:
+                    txt = set(post['message'])
+                    if searchFor in txt:
+                        count+=1
+                        id = post['id']
+                        likesForSearchFor[id] = self.getNumLikesForPost(id)
+        f = open(saveFileName,'w')
+        json.dump(likesForSearchFor,f)
+        print 'count = {}, total ={}, total-count = {},count/total ={}'.format( count,total, total-count,float(count)/total)
+        f.close()
 
-def some_action(post):
-    """ Here you might want to do something with each post. E.g. grab the
-    post's message (post['message']) or the post's picture (post['picture']).
-    In this implementation we just print the post's created time.
-    """
-    print(post['created_time'])
+    def timesXIsMentioned(self,fileName,X,saveFileName):
+        punctuation = set(string.punctuation)
+        if len(X) == 0: return
+        if type(X) == str:
+            X=[X]
+            X = set(X)
+        elif type(X) == list:
+            X = set(X)
+        assert type(X) == set
+        counts = {}
 
+        rFile = open(fileName,'r')
+        posts = json.load(rFile)
+        rFile.close()
+        for page in posts:
+            page = json.loads(page)
+            for post in page:
+                if 'message' in post:
+
+                    txt = post['message'].lower().split()
+                    for c,word in enumerate(txt):
+                        word = word.strip()
+                        word2 =''
+                        if word[-1] in punctuation:
+                            word = word[:-1]
+                        if c + 1 < len(txt):
+                            word2 = txt[c+1]
+                            word2 = word2.strip()
+                            if word2[-1] in punctuation:
+                                word2 = word2[:-1]
+                        if word in X:
+                            if post['id'] not in counts:
+                                 counts[post['id']] ={}
+                                 counts[post['id']][word] =1
+                            else:
+                                if word not in counts[post['id']]:
+                                   counts[post['id']][word] =1
+                                else:
+                                   counts[post['id']][word]+=1
+                        elif word + ' ' + word2 in X:
+                             if post['id'] not in counts:
+                                 counts[post['id']] ={}
+                                 counts[post['id']][word + ' ' + word2]= 1
+                             else:
+                                if word not in counts[post['id']]:
+                                   counts[post['id']][ word + ' ' + word2] =1
+                                else:
+                                   counts[post['id']][ word + ' ' + word2]+=1
+
+
+        print counts
+        f = open(saveFileName,'w')
+        json.dump(counts,f)
 
 graph = GraphAPI()
 #comments = graph.getAllComments()
 #graph.saveToFile('all_comments.txt',comments)
-r = graph.getNumLikesForPost('79770243223_10154089375478224')
-print r
+#r = graph.getNumLikesForPost('79770243223_10154089375478224')
+#print r
+
+provinces = ['phnom penh', 'banteay meanchey', 'battambang','kampong cham', 'kampong chhang','kampong thom', 'kampot province', 'kandal', 'koh kong',
+             'kep', 'kratié', 'kratie','mondulkiri', 'oddary meanchev', 'pailin', 'preah sihanouk', 'preah vihear', 'pursat', 'prey veng', 'ratanakiri',
+             'siem reap', 'stung treng', 'svay rieng', 'takéo', 'takeo','tboung khmum']
+graph.timesXIsMentioned('posts.txt',provinces, 'provinces.txt')
+#graph.numberOfKindOfChar("posts.txt")
+#graph.numberOfKindOfChar('posts.txt', '!')
+
 #graph.saveToFile('all_reactions.txt',r)
 

@@ -1,4 +1,4 @@
 __author__ = 'jsuit'
 
-access_token =''
+access_token=''
 user = '79770243223'
