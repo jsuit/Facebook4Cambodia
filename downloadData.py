@@ -348,28 +348,10 @@ class GraphAPI():
             plt.show()
             #print daily_rets
 graph = GraphAPI()
-#comments = graph.getAllComments()
-#graph.saveToFile('all_comments.txt',comments)
-#r = graph.getNumLikesForPost('79770243223_10154089375478224')
-#print r
+
 
 provinces = ['phnom penh', 'banteay meanchey', 'battambang','kampong cham', 'kampong chhang','kampong thom', 'kampot province', 'kandal', 'koh kong',
              'kep', 'kratié', 'kratie','mondulkiri', 'oddary meanchev', 'pailin', 'preah sihanouk', 'preah vihear', 'pursat', 'prey veng', 'ratanakiri',
              'siem reap', 'stung treng', 'svay rieng', 'takéo', 'takeo','tboung khmum']
-#graph.timesXIsMentioned('posts.txt',provinces, 'provinces.txt')
-#media_list = graph.getDataType()
-#graph.numberOfKindOfChar("posts.txt")
-#graph.numberOfKindOfChar('posts.txt', '!')
-#tempDict = graph.getLikesForPostsInOrderOfDate('posts.txt')
-import matplotlib.pyplot as plt
-import numpy as np
-#graphDict =collections.OrderedDict()
-#f = open('likesByDate.txt', 'r')
-#tempDict = json.load(f)
-graph.getNumShares()
-#graph.percentGain('LikesByDate.txt')
 
-
-
-#graph.saveToFile('all_reactions.txt',r)
 
