@@ -13,9 +13,11 @@ import collections
 import os.path
 import matplotlib.ticker as ticker
 import pandas as pd
+import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime
 from time import strptime
+import numpy as np
 class GraphAPI():
 
     access_token = Globals.access_token
@@ -348,7 +350,10 @@ class GraphAPI():
             plt.show()
             #print daily_rets
 graph = GraphAPI()
-
+#comments = graph.getAllComments()
+#graph.saveToFile('all_comments.txt',comments)
+#r = graph.getNumLikesForPost('79770243223_10154089375478224')
+#print r
 
 provinces = ['phnom penh', 'banteay meanchey', 'battambang','kampong cham', 'kampong chhang','kampong thom', 'kampot province', 'kandal', 'koh kong',
              'kep', 'kratié', 'kratie','mondulkiri', 'oddary meanchev', 'pailin', 'preah sihanouk', 'preah vihear', 'pursat', 'prey veng', 'ratanakiri',
