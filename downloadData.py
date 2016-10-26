@@ -349,12 +349,69 @@ class GraphAPI():
             ax.lines[-1].set_linewidth(1)
             plt.show()
             #print daily_rets
+
+    def SharesOverTime(self,fileName):
+        rFile = open(fileName,'r')
+        posts = json.load(rFile)
+        rFile.close()
+        sharesDict ={}
+        s_count = float('-inf')
+        s_date =None
+        shares = json.load(open("SharesForPost.txt",'r'))
+        for page in posts:
+            page = json.loads(page)
+            for post in page:
+                count = shares[post['id']]
+                if count > 0:
+                    cDate = post['created_time'][0:-5]
+                    #print datetime(*strptime(post['created_time'][0:-5], "%Y-%m-%dT%H:%M:%S")[0:6])
+                    if cDate not in sharesDict:
+                        sharesDict[cDate] = count
+                    else:
+                        sharesDict[cDate]+=count
+                if s_count < sharesDict[cDate]:
+                    s_count = sharesDict[cDate]
+                    s_date = cDate
+
+        sharesDict = collections.OrderedDict(sorted(sharesDict.items()))
+        tempDict = collections.OrderedDict()
+        for i in sharesDict:
+                tempDict[i[0:10]] = sharesDict[i]
+
+        dates = np.arange(len(tempDict.keys()))
+
+        print len(dates)
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        #major_ticks = np.arange(0, len(dates), 100)
+        #ax.set_xticks(major_ticks)
+        #with plt.style.context('fivethirtyeight'):
+        plt.barh(dates,tempDict.values(),color='g',align='center')
+        plt.yticks(dates[::90], tempDict.keys()[::90])
+        #plt.xticks(rotation=75)
+        plt.tight_layout()
+        plt.show()
+
+    def getSharesOnDay(self,fileName,date):
+        rFile = open(fileName,'r')
+        posts = json.load(rFile)
+        rFile.close()
+        sharesDict ={}
+        s_count = float('-inf')
+        s_date =None
+        shares = json.load(open("SharesForPost.txt",'r'))
+        for page in posts:
+            page = json.loads(page)
+            for post in page:
+                time = post['created_time'][0:10]
+                if time == date:
+                    print post['id'],post,shares[post['id']]
 graph = GraphAPI()
 #comments = graph.getAllComments()
 #graph.saveToFile('all_comments.txt',comments)
 #r = graph.getNumLikesForPost('79770243223_10154089375478224')
 #print r
-
+graph.getSharesOnDay('posts.txt', '2016-06-10' )
 provinces = ['phnom penh', 'banteay meanchey', 'battambang','kampong cham', 'kampong chhang','kampong thom', 'kampot province', 'kandal', 'koh kong',
              'kep', 'kratié', 'kratie','mondulkiri', 'oddary meanchev', 'pailin', 'preah sihanouk', 'preah vihear', 'pursat', 'prey veng', 'ratanakiri',
              'siem reap', 'stung treng', 'svay rieng', 'takéo', 'takeo','tboung khmum']
