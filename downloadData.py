@@ -107,6 +107,8 @@ class GraphAPI():
         #reactions = self.graph.get_connections(id=postId, connection_name='reactions',args={'fields': 'summary=1','total_count':1})
         #print r.text
         txt = r.json()
+        if 'reactions' not in txt:
+            return 0
         return  txt['reactions']['summary']['total_count']
 
 
@@ -363,13 +365,14 @@ class GraphAPI():
             for post in page:
                 count = shares[post['id']]
                 if count > 0:
-                    cDate = post['created_time'][0:-5]
+                    cDate = post['created_time'][0:10]
                     #print datetime(*strptime(post['created_time'][0:-5], "%Y-%m-%dT%H:%M:%S")[0:6])
                     if cDate not in sharesDict:
                         sharesDict[cDate] = count
                     else:
                         sharesDict[cDate]+=count
-                if s_count < sharesDict[cDate]:
+
+                if s_count < sharesDict[cDate] and cDate != '2016-06-10':
                     s_count = sharesDict[cDate]
                     s_date = cDate
 
@@ -411,7 +414,7 @@ graph = GraphAPI()
 #graph.saveToFile('all_comments.txt',comments)
 #r = graph.getNumLikesForPost('79770243223_10154089375478224')
 #print r
-graph.getSharesOnDay('posts.txt', '2016-06-10' )
+graph.getSharesOnDay('posts.txt','2016-07-11' )
 provinces = ['phnom penh', 'banteay meanchey', 'battambang','kampong cham', 'kampong chhang','kampong thom', 'kampot province', 'kandal', 'koh kong',
              'kep', 'kratié', 'kratie','mondulkiri', 'oddary meanchev', 'pailin', 'preah sihanouk', 'preah vihear', 'pursat', 'prey veng', 'ratanakiri',
              'siem reap', 'stung treng', 'svay rieng', 'takéo', 'takeo','tboung khmum']
