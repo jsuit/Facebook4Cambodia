@@ -101,6 +101,7 @@ class GraphAPI():
             for post in page:
                 Shares[post['id']]=self.getSharesPerPost(post['id'])
         json.dump(Shares,open('SharesForPost.txt','w'))
+
     def getNumReactionsForPost(self,postId):
 
         r = requests.get('https://graph.facebook.com/v2.8/'+ postId +'/?fields=reactions.summary(1).limit(1)&access_token='+Globals.access_token)
@@ -108,7 +109,7 @@ class GraphAPI():
         #print r.text
         txt = r.json()
         if 'reactions' not in txt:
-            return 0
+            return -1
         return  txt['reactions']['summary']['total_count']
 
 
@@ -117,7 +118,7 @@ class GraphAPI():
         r = requests.get(reqString)
         txt = r.json()
         if 'likes' not in txt:
-            return 0
+            return -1
         return  txt['likes']['summary']['total_count']
 
 
@@ -207,13 +208,15 @@ class GraphAPI():
             page = json.loads(page)
             for post in page:
                 count = self.getNumLikesForPost(post['id'])
-                if count > 0:
+                if count >=0:
                     cDate = post['created_time'][0:-5]
+
+                    if 2009 <= int(cDate[0:4]):
                     #print datetime(*strptime(post['created_time'][0:-5], "%Y-%m-%dT%H:%M:%S")[0:6])
-                    if cDate not in mostLikedID:
-                        mostLikedID[cDate] = count
-                    else:
-                        mostLikedID[cDate]+=count
+                        if cDate not in mostLikedID:
+                            mostLikedID[cDate] = count
+                        else:
+                            mostLikedID[cDate]+=count
 
 
         sortedLikes = collections.OrderedDict(sorted(mostLikedID.items()))
@@ -234,7 +237,8 @@ class GraphAPI():
             sortedDict = collections.OrderedDict(sorted(sortedDict.items()))
 
             for key in sortedDict:
-                    tempDict[key[0:10]] = sortedDict[key]
+                    if 2009 <= int(key[0:4]):
+                        tempDict[key[0:10]] = sortedDict[key]
 
         dates = np.arange(len(tempDict.keys()))
         print len(dates)
@@ -244,7 +248,7 @@ class GraphAPI():
         #ax.set_xticks(major_ticks)
         #with plt.style.context('fivethirtyeight'):
         plt.plot(dates, tempDict.values(),color='b')
-        plt.xticks(dates[::100], tempDict.keys()[::100])
+        plt.xticks(dates[::100], tempDict.keys()[:fdffd])
         plt.xticks(rotation=75)
         plt.tight_layout()
 
@@ -329,19 +333,20 @@ class GraphAPI():
             likes = json.load(f)
             f.close()
             tempDict = collections.OrderedDict()
-            count = 3200
             likes = collections.OrderedDict(sorted(likes.items()))
             for i,key in enumerate(likes):
-                if i>count:
                     key2 = key[0:10]
-                    tempDict[key2] = likes[key]
+                    key3 = key2[0:4]
+                    if key3 <= '2009':
+                        tempDict[key2] = likes[key]
             df = pd.DataFrame(tempDict.items(),columns=['Date', 'Total Likes'],index=tempDict.keys())
             #print df['Total Likes']
             df = pd.to_numeric(df['Total Likes'])
-            df = df/df.ix[0]
+            df = df/df.ix[0] -1
             ax = df.plot()
             #daily_rets = df[:] / df.shift(1) -1
             ax.set_ylabel("% Increase in Likes")
+
             #ticks = ax.xaxis.get_ticklocs()
             ticklabels = [l.get_text() for l in ax.xaxis.get_ticklabels()]
             #print len(ticklabels)
@@ -364,18 +369,19 @@ class GraphAPI():
             page = json.loads(page)
             for post in page:
                 count = shares[post['id']]
-                if count > 0:
+                if count >= 0:
                     cDate = post['created_time'][0:10]
+                    if 2009 <= int(cDate[0:4]):
                     #print datetime(*strptime(post['created_time'][0:-5], "%Y-%m-%dT%H:%M:%S")[0:6])
-                    if cDate not in sharesDict:
-                        sharesDict[cDate] = count
-                    else:
-                        sharesDict[cDate]+=count
+                        if cDate not in sharesDict:
+                            sharesDict[cDate] = count
+                        else:
+                            sharesDict[cDate]+=count
 
-                if s_count < sharesDict[cDate] and cDate != '2016-06-10':
+                '''if s_count < sharesDict[cDate] and cDate != '2016-06-10':
                     s_count = sharesDict[cDate]
                     s_date = cDate
-
+                '''
         sharesDict = collections.OrderedDict(sorted(sharesDict.items()))
         tempDict = collections.OrderedDict()
         for i in sharesDict:
@@ -389,9 +395,10 @@ class GraphAPI():
         #major_ticks = np.arange(0, len(dates), 100)
         #ax.set_xticks(major_ticks)
         #with plt.style.context('fivethirtyeight'):
-        plt.barh(dates,tempDict.values(),color='g',align='center')
-        plt.yticks(dates[::90], tempDict.keys()[::90])
-        #plt.xticks(rotation=75)
+        plt.bar(dates,tempDict.values(),color='g')
+        plt.xticks(dates[::75], tempDict.keys()[::75])
+        plt.xticks(rotation=
+                   75)
         plt.tight_layout()
         plt.show()
 
@@ -410,11 +417,15 @@ class GraphAPI():
                 if time == date:
                     print post['id'],post,shares[post['id']]
 graph = GraphAPI()
+#graph.getLikesForPos
+# tsInOrderOfDate('posts.txt')
+graph.SharesOverTime('posts.txt')
+
 #comments = graph.getAllComments()
 #graph.saveToFile('all_comments.txt',comments)
 #r = graph.getNumLikesForPost('79770243223_10154089375478224')
 #print r
-graph.getSharesOnDay('posts.txt','2016-07-11' )
+#graph.getSharesOnDay('posts.txt','2016-07-11' )
 provinces = ['phnom penh', 'banteay meanchey', 'battambang','kampong cham', 'kampong chhang','kampong thom', 'kampot province', 'kandal', 'koh kong',
              'kep', 'kratié', 'kratie','mondulkiri', 'oddary meanchev', 'pailin', 'preah sihanouk', 'preah vihear', 'pursat', 'prey veng', 'ratanakiri',
              'siem reap', 'stung treng', 'svay rieng', 'takéo', 'takeo','tboung khmum']
