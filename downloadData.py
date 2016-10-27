@@ -64,12 +64,14 @@ class GraphAPI():
     def countComments(self, comments_file):
         comments=json.load(open(comments_file,'r'))
         s = 0
+        commntCount ={}
         for id in comments:
             cmtList = comments[id]
+            commntCount[id]=0
             for i in cmtList:
                 cmts = json.loads(i)
-                s+= len(cmts)
-        return s
+                commntCount[id]+= len(cmts)
+        json.dump(commntCount,open('commntCnts.txt','w'),indent=4)
     def writeLikeNumToFile(self, fileName):
         f = open(fileName,'r')
         data = json.load(f)
@@ -248,7 +250,7 @@ class GraphAPI():
         #ax.set_xticks(major_ticks)
         #with plt.style.context('fivethirtyeight'):
         plt.plot(dates, tempDict.values(),color='b')
-        plt.xticks(dates[::100], tempDict.keys()[:fdffd])
+        plt.xticks(dates[::100], tempDict.keys()[::100])
         plt.xticks(rotation=75)
         plt.tight_layout()
 
@@ -419,8 +421,8 @@ class GraphAPI():
 graph = GraphAPI()
 #graph.getLikesForPos
 # tsInOrderOfDate('posts.txt')
-graph.SharesOverTime('posts.txt')
-
+#graph.SharesOverTime('posts.txt')
+graph.countComments('all_comments.txt')
 #comments = graph.getAllComments()
 #graph.saveToFile('all_comments.txt',comments)
 #r = graph.getNumLikesForPost('79770243223_10154089375478224')

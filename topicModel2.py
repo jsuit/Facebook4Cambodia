@@ -15,7 +15,7 @@ f = open(fileName, 'r')
 data = json.load(f)
 df =  pd.DataFrame(data)
 df = df.transpose()
-
+print df
 #stopwords file
 fileName = 'stopwords.txt'
 #get set of stopwords
@@ -73,4 +73,4 @@ lda.print_topics(20)
 
 print lda.get_document_topics(dictionary.doc2bow(stemmed_texts[0]))
 df = df.ix[:,[0,1,3,4,5,6]]
-df.to_csv("processed_data.csv")
+#df.to_csv("processed_data.csv")
