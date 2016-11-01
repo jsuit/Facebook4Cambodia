@@ -1,4 +1,5 @@
 __author__ = 'jsuit'
+
 import json
 from gensim import corpora
 import logging, gensim, bz2
@@ -7,6 +8,7 @@ import pandas as pd
 from functools import partial
 import string
 from stopWords import stopWords
+from gensim import corpora, models, similarities
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 fileName = 'posts_language.txt'
 
@@ -47,7 +49,7 @@ def remove_punc(entry):
                 newWord.append(c)
         s = ''.join(newWord)
         if not s.isspace() and s != '':
-            tempText.append(s)           
+            tempText.append(s)
     return tempText
 
 
@@ -69,12 +71,23 @@ dictionary = corpora.Dictionary(stemmed_texts)
 
 df['bow'] = df['stemmed_text'].apply(partial(bow,dictionary))
 corpus = [dictionary.doc2bow(text) for text in stemmed_texts]
-#print df['bow']
 
-lda = gensim.models.ldamodel.LdaModel(corpus=corpus, id2word=dictionary, num_topics=20, update_every=0, chunksize=10000, passes=20)
-lda.print_topics(20)
+tfidf = models.TfidfModel(corpus,normalize=True)
+corpus_tfidf = tfidf[corpus]
+lsi = models.LsiModel(corpus=corpus, id2word=dictionary, num_topics=2)
 
-#print lda.get_document_topics(dictionary.doc2bow(stemmed_texts[0]))
+lsi.print_topics(num_topics=20, num_words=2)
+corpus_tfidf = tfidf[corpus]
+corpus_lsi = lsi[corpus_tfidf]
+x = []
+y =[]
+for i,doc in enumerate(corpus_lsi):
+    print doc,i
+    if len(doc) >= 1:
+        x.append(doc[0][1])
+        y.append(doc[1][1])
 
-df = df.ix[:,[0,1,3,4,5,6]]
-#df.to_csv("processed_data.csv")
+from matplotlib import pyplot as plt
+
+plt.plot(x,y,'ro')
+plt.show()
