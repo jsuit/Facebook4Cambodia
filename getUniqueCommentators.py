@@ -43,12 +43,16 @@ def countComments(comments_file,df):
     #df = df.set_index('ids')
     #print df
     groupByID = df2.groupby('ids')
+
     print sum(groupByID.poster_id.nunique())
     print sum(groupByID.poster_id.agg('count'))
-    series= -groupByID.poster_id.nunique() +groupByID.poster_id.agg('count')
+    #num unique posters
+    series= groupByID.poster_id.nunique()
+    print series
     df3 = pd.DataFrame(series)
     #df.join( -groupByID.poster_id.nunique() +groupByID.poster_id.agg('count'))
     df = df.join(df3)
     df=df.rename(columns = {'poster_id':'unique_comments'})
     df.to_csv("countsWithUniqueCommentsCounts.csv")
 countComments('all_comments.txt',df)
+
