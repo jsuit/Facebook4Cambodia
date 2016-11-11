@@ -2,6 +2,8 @@
 import string
 import matplotlib.pyplot as plt
 import numpy as np
+import re
+import json
 
 def filterPunc(inputStr=""):
     #version 1.0, Oct. 21st, 2016
@@ -15,7 +17,9 @@ def filterPunc(inputStr=""):
 def countWords(readInFileName="./posts.txt",drawPlot=0):
     readin_file=open(readInFileName, "r");
     wholeContent=readin_file.read();
-    postList=wholeContent.split("}, {");
+    #sp=re.compile(r'}\]\", \"\[{'|r'}, {')
+    postList=re.split(r'(}, {|}\]\", \"\[{)',wholeContent);
+    #postList=wholeContent.split(sp);
     Eng = [0, 0, 0, 0, 0, 0, 0];
     Kh = [0, 0, 0, 0, 0, 0, 0];
     mixEng = [0, 0, 0, 0, 0, 0, 0];
@@ -247,9 +251,32 @@ def countWords(readInFileName="./posts.txt",drawPlot=0):
         plt.figure(6)
         plt.plot(x[:40], distribution[:40])
         plt.show()
-        print np.max(distribution)
+
 
         pass;
+
+    if drawPlot==5:#write a json-format file about each post and how many eng words it has
+        engCount={}
+        for postnum in range(len(postList)):
+            if "\\\"message\\\"" not in postList[postnum]:
+                # this post does not have a message field
+                continue;
+            thisLan = 2;  # represents which Language this post is using, 1 for Eng, 2 for Eng+Kh, 3 for Kh
+            divideOne = postList[postnum].split("\\\"message\\\": \\\"")
+            divideTwo = divideOne[1].split("\\\", \\\"");
+            # use divideTwo[0]
+            KhCount = divideTwo[0].count("\\u");  # how many Kh words
+            EngCount = 0;
+            divideThree = divideTwo[0].split(" ");
+            for iter in range(len(divideThree)):
+                if "\\u" not in divideThree[iter]:
+                    EngCount = EngCount + 1;
+            postID=postList[postnum].split("\\\"id\\\": \\\"")[1].split("\\\"")[0];#.split("\\\"")[0]
+
+
+            engCount[postID]=str(EngCount)
+        f = open("output.txt", 'w')
+        json.dump(engCount, f)
 
 
 
@@ -261,7 +288,4 @@ def countWords(readInFileName="./posts.txt",drawPlot=0):
 
 if __name__ == "__main__":
     # a test function
-    countWords(readInFileName="./posts.txt",drawPlot=2);
-    countWords(readInFileName="./posts.txt", drawPlot=3);
-    countWords(readInFileName="./posts.txt", drawPlot=4);
-
+    countWords(readInFileName="./posts.txt",drawPlot=0);
